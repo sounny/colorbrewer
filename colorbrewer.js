@@ -412,7 +412,7 @@ function loadOverlays(o)
 		}
 	});
 }
-$(".learn-more, #how, #credits, #downloads").click(function(e){
+$(".learn-more, #how, #credits, #downloads, #fork-info").click(function(e){
 	e.stopPropagation();
 	var page;
 	switch( $(this).attr("id") ){
@@ -441,15 +441,20 @@ $(".learn-more, #how, #credits, #downloads").click(function(e){
 		page = "credits.html";
 		break;
 
-		case "downloads":
-		$("#learnmore-title").html("DOWNLOADS");
-		page = "downloads.html";
-		break;
+                case "downloads":
+                $("#learnmore-title").html("DOWNLOADS");
+                page = "downloads.html";
+                break;
 
-		case "context-learn-more":
-		$("#learnmore-title").html("MAP CONTEXT and BACKGROUND");
-		page = "context.html";
-		break;
+                case "fork-info":
+                $("#learnmore-title").html("ABOUT THIS FORK");
+                page = "fork-info.html";
+                break;
+
+                case "context-learn-more":
+                $("#learnmore-title").html("MAP CONTEXT and BACKGROUND");
+                page = "context.html";
+                break;
 	}
 	if ( page ){
 		$("#learnmore #content").load("learnmore/"+page,function(){
