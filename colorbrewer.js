@@ -91,29 +91,22 @@ function setNumClasses(n)
 var selectedSchemeType;
 function setSchemeType(type)
 {
-	selectedSchemeType = type;
+        selectedSchemeType = type;
 
-	$( "#num-classes option" ).removeAttr( "disabled" );
-	switch( selectedSchemeType )
-	{
-		case "sequential":
-			if( $( "#num-classes" ).val() >= 10 )
-			{
-				$( "#num-classes" ).val( 9 );
-				numClasses = 9;
-			}
-			$( "#num-classes option[name=10], #num-classes option[name=11], #num-classes option[name=12]" ).attr( "disabled", "disabled" );
-			break;
-		case "diverging":
-			if( $( "#num-classes" ).val() >= 12 )
-			{
-				$( "#num-classes" ).val( 11 );
-				numClasses = 11;
-			}
-			$( "#num-classes option[name=12]" ).attr( "disabled", "disabled" );
-			break;
-	}
-	showSchemes();
+        var limits = { sequential: 9, diverging: 11, qualitative: 12 };
+        var max = limits[selectedSchemeType] || 12;
+
+        $("#num-classes option")
+                .prop("disabled", false)
+                .filter(function(){ return +$(this).attr("name") > max; })
+                .prop("disabled", true);
+
+        if ( $("#num-classes").val() > max ){
+                $("#num-classes").val(max);
+                numClasses = max;
+        }
+
+        showSchemes();
 }
 
 function showSchemes()
@@ -268,39 +261,33 @@ function applyColors()
 
 function drawColorChips()
 {
-	var svg = "<svg width='24' height='270'>";
-	for ( var i = 0; i < numClasses; i++ ){
-		svg += "<rect fill="+colorbrewer[selectedScheme][numClasses][i]+" width='24' height='"+Math.min(24,parseInt(265/numClasses))+"' y='"+i*Math.min(24,parseInt(265/numClasses))+"'/>";
-	}
-	$("#color-chips").empty().append(svg);
-	updateValues();
+        var step = Math.min(24,parseInt(265/numClasses));
+        var svg = "<svg width='24' height='270'>";
+        for ( var i = 0; i < numClasses; i++ ){
+                svg += "<rect fill="+colorbrewer[selectedScheme][numClasses][i]+" width='24' height='"+step+"' y='"+i*step+"'/>";
+        }
+        $("#color-chips").empty().append(svg);
+        updateValues();
 }
 
 function updateValues()
 {
-	$("#color-values").empty();
-	var str = "";
-	var s = $("#color-system").val().toLowerCase();
-	var jsonString = "[";
-	$("#color-chips rect").each(function(i){
-		var val = ( s == "cmyk" ? getCMYK(selectedScheme,numClasses,i) : getColorDisplay($(this).css("fill")) );
-		str += val + "\n";
+        $("#color-values").empty();
+        var s = $("#color-system").val().toLowerCase();
+        var jsonVals = [], outVals = [];
+        $("#color-chips rect").each(function(i){
+                var color = $(this).css("fill");
+                outVals.push( s == "cmyk" ? getCMYK(selectedScheme,numClasses,i) : getColorDisplay(color) );
 
-		var jsonVal = getColorDisplay($(this).css("fill"));
-		if ( s == "hex" ) {
-			jsonString += "'" + jsonVal + "'";
-		} else {
-			jsonString += "'rgb(" + jsonVal + ")'";
-		}
-		if ( i < numClasses - 1 ) jsonString += ",";
-	});
-	jsonString += "]";
-	str = str.replace( /\n$/, "" );
+                var jsonVal = getColorDisplay(color);
+                jsonVals.push( s == "hex" ? "'"+jsonVal+"'" : "'rgb("+jsonVal+")'" );
+        });
 
-	$("#color-values").append("<textarea readonly style='line-height:"+Math.min(24,parseInt(265/numClasses))+"px; height:"+Math.min(24,parseInt(265/numClasses))*numClasses+"px'>"+str+"</textarea>");
-	$( "#ase" ).attr( "href", "export/ase/" + selectedScheme + "_" + numClasses + ".ase" );
-	$( "#gpl" ).attr( "href", "export/gpl/" + selectedScheme + "_" + numClasses + ".gpl" );
-	$("#copy-json input").val(jsonString);
+        var step = Math.min(24,parseInt(265/numClasses));
+        $("#color-values").append("<textarea readonly style='line-height:"+step+"px; height:"+step*numClasses+"px'>"+outVals.join("\n")+"</textarea>");
+        $("#ase").attr("href", "export/ase/" + selectedScheme + "_" + numClasses + ".ase" );
+        $("#gpl").attr("href", "export/gpl/" + selectedScheme + "_" + numClasses + ".gpl" );
+        $("#copy-json input").val("[" + jsonVals.join(",") + "]");
 }
 
 function getColorDisplay(c,s)
