@@ -8,3 +8,5 @@
 ## Logs
 
 
+
+- 2025-07-26 ChatGPT: Moved original site into version2 directory and added a new Leaflet-based demo with dynamic color schemes.
