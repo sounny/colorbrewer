@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>ColorBrewer for Leaflet</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="main.css" />
+</head>
+<body>
+<div id="map"></div>
+<div class="controls">
+  <label>Scheme:
+    <select id="scheme"></select>
+  </label>
+  <label>Classes:
+    <select id="classes">
+      <option>3</option><option>4</option><option>5</option><option>6</option><option>7</option>
+    </select>
+  </label>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="../version2/colorbrewer_schemes.js"></script>
+<script src="main.js"></script>
+</body>
+</html>

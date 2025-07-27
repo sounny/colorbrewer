@@ -10,3 +10,4 @@
 
 
 - 2025-07-26 ChatGPT: Moved original site into version2 directory and added a new Leaflet-based demo with dynamic color schemes.
+- 2025-07-27 ChatGPT: Moved Leaflet demo into its own folder, added overview index page linking to version2 and the Leaflet demo, and updated README.

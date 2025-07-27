@@ -2,24 +2,28 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>ColorBrewer Leaflet Demo</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<link rel="stylesheet" href="main.css" />
+<title>ColorBrewer</title>
+<style>
+ body{font-family:sans-serif;margin:2em;max-width:800px;line-height:1.5;}
+ .links a{display:block;margin:0.5em 0;}
+</style>
 </head>
 <body>
-<div id="map"></div>
-<div class="controls">
-  <label>Scheme:
-    <select id="scheme"></select>
-  </label>
-  <label>Classes:
-    <select id="classes">
-      <option>3</option><option>4</option><option>5</option><option>6</option><option>7</option>
-    </select>
-  </label>
+<h1>ColorBrewer</h1>
+<p>
+ColorBrewer is a set of carefully designed color palettes for maps and other
+graphics. It was originally created by cartographer Cynthia Brewer in the early
+2000s at Pennsylvania State University to help mapmakers choose colors that
+work well together, reproduce in print, and remain readable for people with
+color-vision deficiencies. Over the years it has become a standard reference for
+selecting sequential, diverging, and qualitative color schemes.
+</p>
+<p>
+Below you can explore two versions of the project:
+</p>
+<div class="links">
+ <a href="version2/">ColorBrewer2 (classic interface)</a>
+ <a href="leaflet/">ColorBrewer for Leaflet</a>
 </div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="version2/colorbrewer_schemes.js"></script>
-<script src="main.js"></script>
 </body>
 </html>
