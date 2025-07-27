@@ -13,4 +13,8 @@
 - 2025-07-27 ChatGPT: Moved Leaflet demo into its own folder, added overview index page linking to version2 and the Leaflet demo, and updated README.
 - 2025-07-27 ChatGPT: Created `literature` directory, added placeholder README, updated root README, modernized `index.html` styling.
 
+<<<<<<< HEAD
 - 2025-07-27 ChatGPT: Renamed literature PDFs, added annotated bibliography with APA citations and summaries.
+=======
+- 2025-07-27 ChatGPT: Added hover tooltips showing RGB/HEX in Leaflet demo, legend with color chips, and probe UI.
+>>>>>>> c73dbf16213e038fc2b0b46a3dc67103638b7656
