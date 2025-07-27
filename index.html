@@ -4,11 +4,41 @@
 <meta charset="utf-8">
 <title>ColorBrewer</title>
 <style>
- body{font-family:sans-serif;margin:2em;max-width:800px;line-height:1.5;}
- .links a{display:block;margin:0.5em 0;}
+ body {
+   font-family: "Helvetica Neue", Arial, sans-serif;
+   margin: 0;
+   padding: 0;
+   line-height: 1.6;
+   background: linear-gradient(to bottom right, #f2f4f8, #dfe6f1);
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   min-height: 100vh;
+   color: #333;
+ }
+ .container {
+   background: white;
+   padding: 2em;
+   border-radius: 8px;
+   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+   max-width: 800px;
+ }
+ .links a {
+   display: inline-block;
+   margin: 0.5em;
+   padding: 0.5em 1em;
+   background: #007bff;
+   color: white;
+   text-decoration: none;
+   border-radius: 4px;
+ }
+ .links a:hover {
+   background: #0056b3;
+ }
 </style>
 </head>
 <body>
+<div class="container">
 <h1>ColorBrewer</h1>
 <p>
 ColorBrewer is a set of carefully designed color palettes for maps and other
@@ -24,6 +54,7 @@ Below you can explore two versions of the project:
 <div class="links">
  <a href="version2/">ColorBrewer2 (classic interface)</a>
  <a href="leaflet/">ColorBrewer for Leaflet</a>
+</div>
 </div>
 </body>
 </html>
