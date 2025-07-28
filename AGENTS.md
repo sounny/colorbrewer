@@ -14,3 +14,4 @@
 - 2025-07-27 ChatGPT: Added hover tooltips showing RGB/HEX in Leaflet demo, legend with color chips, and probe UI.
 
 - 2025-07-28 ChatGPT: Consolidated repeated code in leaflet/main.js to prevent variable redeclaration; cleaned AGENTS.md merge markers.
+- 2025-07-28 ChatGPT: Added missing US counties GeoJSON dataset for Leaflet demo.
