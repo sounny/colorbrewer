@@ -1,5 +1,6 @@
 // Initialize Leaflet map
-const map = L.map('map').setView([37.8, -96], 4);
+// Start focused on the southeastern US like the original ColorBrewer map
+const map = L.map('map').setView([31, -85], 6);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 18,
   attribution: '&copy; OpenStreetMap contributors'
