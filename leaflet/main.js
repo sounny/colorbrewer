@@ -60,6 +60,15 @@ function toHex(str) {
   return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
 }
 
+function toCmyk(str) {
+  const [r, g, b] = rgbArray(str).map(v => v / 255);
+  const k = 1 - Math.max(r, g, b);
+  const c = (1 - r - k) / (1 - k) || 0;
+  const m = (1 - g - k) / (1 - k) || 0;
+  const y = (1 - b - k) / (1 - k) || 0;
+  return [c, m, y, k].map(x => Math.round(x * 100));
+}
+
 function computeBreaks() {
   const scheme = schemeSelect.value || 'YlGn';
   const num = parseInt(classesSelect.value, 10) || 3;
@@ -96,7 +105,8 @@ function styleFeature(feature) {
 function showProbeFromEvent(e, idx) {
   const col = colors[idx];
   const [r, g, b] = rgbArray(col);
-  probe.innerHTML = `<p>${schemeSelect.value} class ${idx + 1}<br/>HEX: ${toHex(col)}<br/>RGB: ${r}, ${g}, ${b}</p>`;
+  const [c, m, y, k] = toCmyk(col);
+  probe.innerHTML = `<p>${schemeSelect.value} class ${idx + 1}<br/>HEX: ${toHex(col)}<br/>RGB: ${r}, ${g}, ${b}<br/>CMYK: ${c}, ${m}, ${y}, ${k}</p>`;
   probe.style.left = (e.clientX + 10) + 'px';
   probe.style.top = (e.clientY + 10) + 'px';
   probe.style.display = 'block';
@@ -126,11 +136,13 @@ function updateLegend() {
     item.className = 'legend-item';
     const chip = document.createElement('span');
     const col = colors[idx];
+    const [r, g, b] = rgbArray(col);
+    const [c, m, y, k] = toCmyk(col);
     chip.className = 'legend-chip';
     chip.style.backgroundColor = col;
+    chip.title = `HEX: ${toHex(col)} RGB: ${r}, ${g}, ${b} CMYK: ${c}, ${m}, ${y}, ${k}`;
     chip.addEventListener('mouseenter', e => {
-      const [r, g, b] = rgbArray(col);
-      probe.innerHTML = `<p>HEX: ${toHex(col)}<br/>RGB: ${r}, ${g}, ${b}</p>`;
+      probe.innerHTML = `<p>HEX: ${toHex(col)}<br/>RGB: ${r}, ${g}, ${b}<br/>CMYK: ${c}, ${m}, ${y}, ${k}</p>`;
       probe.style.left = (e.clientX + 10) + 'px';
       probe.style.top = (e.clientY + 10) + 'px';
       probe.style.display = 'block';
