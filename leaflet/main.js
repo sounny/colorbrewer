@@ -12,19 +12,43 @@ const classesSelect = document.getElementById('classes');
 const layerSelect = document.getElementById('layer');
 const legend = document.getElementById('legend');
 const probe = document.getElementById('probe');
+const schemeInfo = document.getElementById('scheme-info');
 
 // Shared data and style state
 let data, geo;
-let breaks = [], colors = [];
+let breaks = [], colors = [], ranges = [];
+let minVal = 0, maxVal = 0;
 
 // Populate color scheme options
 const seq = colorbrewer;
-Object.keys(seq).forEach(name => {
-  const opt = document.createElement('option');
-  opt.value = name;
-  opt.textContent = name;
-  schemeSelect.appendChild(opt);
+const schemesByType = { seq: [], div: [], qual: [] };
+Object.entries(seq).forEach(([name, val]) => {
+  const t = val.properties?.type;
+  if (schemesByType[t]) schemesByType[t].push(name);
 });
+const typeLabels = { seq: 'Sequential', div: 'Diverging', qual: 'Qualitative' };
+Object.keys(typeLabels).forEach(t => {
+  const group = document.createElement('optgroup');
+  group.label = typeLabels[t];
+  schemesByType[t].sort().forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    group.appendChild(opt);
+  });
+  schemeSelect.appendChild(group);
+});
+
+const typeDescriptions = {
+  seq: 'Sequential schemes work for ordered data from low to high.',
+  div: 'Diverging schemes emphasize deviation around a midpoint.',
+  qual: 'Qualitative schemes highlight categorical differences.'
+};
+
+function updateSchemeInfo() {
+  const t = seq[schemeSelect.value]?.properties?.type;
+  schemeInfo.textContent = t ? typeDescriptions[t] : '';
+}
 
 // Utility helpers
 function rgbArray(str) {
@@ -41,10 +65,18 @@ function computeBreaks() {
   const num = parseInt(classesSelect.value, 10) || 3;
   colors = seq[scheme][num];
   const values = data.features.map(f => f.properties.density);
+  minVal = Math.min(...values);
+  maxVal = Math.max(...values);
   const sorted = values.slice().sort((a, b) => a - b);
   breaks = [];
   for (let i = 1; i < num; i++) {
     breaks.push(sorted[Math.floor(i * values.length / num)]);
+  }
+  ranges = [];
+  for (let i = 0; i < num; i++) {
+    const from = i === 0 ? minVal : breaks[i - 1];
+    const to = i === num - 1 ? maxVal : breaks[i];
+    ranges.push([from, to]);
   }
 }
 
@@ -89,8 +121,11 @@ function onEachFeature(feature, layer) {
 
 function updateLegend() {
   legend.innerHTML = '';
-  colors.forEach(col => {
-    const chip = document.createElement('div');
+  ranges.forEach((range, idx) => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    const chip = document.createElement('span');
+    const col = colors[idx];
     chip.className = 'legend-chip';
     chip.style.backgroundColor = col;
     chip.addEventListener('mouseenter', e => {
@@ -105,12 +140,17 @@ function updateLegend() {
       probe.style.top = (e.clientY + 10) + 'px';
     });
     chip.addEventListener('mouseleave', () => { probe.style.display = 'none'; });
-    legend.appendChild(chip);
+    item.appendChild(chip);
+    const label = document.createElement('span');
+    label.textContent = `${range[0].toFixed(1)} – ${range[1].toFixed(1)}`;
+    item.appendChild(label);
+    legend.appendChild(item);
   });
 }
 
 function redraw() {
   computeBreaks();
+  updateSchemeInfo();
   if (geo) geo.remove();
   geo = L.geoJson(data, { style: styleFeature, onEachFeature }).addTo(map);
   updateLegend();
@@ -135,4 +175,5 @@ classesSelect.addEventListener('change', redraw);
 layerSelect.addEventListener('change', loadData);
 
 // Initial load
+updateSchemeInfo();
 loadData();
