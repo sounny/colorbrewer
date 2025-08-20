@@ -173,10 +173,12 @@ function updateExports() {
   exportAse.download = `${scheme}_${num}.ase`;
   exportGpl.href = `../version2/export/gpl/${scheme}_${num}.gpl`;
   exportGpl.download = `${scheme}_${num}.gpl`;
-  const lines = colors.map((hx, i) => {
-    const rgb = hx.match(/\w\w/g).map(h => parseInt(h, 16));
-    return `${i + 1} ${rgb[0]} ${rgb[1]} ${rgb[2]}`;
-  }).join('\n');
+  const lines = colors
+    .map((hx, i) => {
+      const rgb = hx.match(/\w\w/g).map(h => parseInt(h, 16));
+      return `${i} ${rgb[0]} ${rgb[1]} ${rgb[2]} 255`;
+    })
+    .join('\n') + '\n';
   const blob = new Blob([lines], { type: 'text/plain' });
   if (exportClr.href && exportClr.href.startsWith('blob:')) {
     URL.revokeObjectURL(exportClr.href);
