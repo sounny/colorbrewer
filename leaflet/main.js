@@ -13,6 +13,12 @@ const layerSelect = document.getElementById('layer');
 const legend = document.getElementById('legend');
 const probe = document.getElementById('probe');
 const schemeInfo = document.getElementById('scheme-info');
+const exportAse = document.getElementById('export-ase');
+const exportGpl = document.getElementById('export-gpl');
+const exportClr = document.getElementById('export-clr');
+const exportText = document.getElementById('export-text');
+const copyJsBtn = document.getElementById('copy-js');
+const copyCssBtn = document.getElementById('copy-css');
 
 // Shared data and style state
 let data, geo;
@@ -160,12 +166,45 @@ function updateLegend() {
   });
 }
 
+function updateExports() {
+  const scheme = schemeSelect.value;
+  const num = parseInt(classesSelect.value, 10);
+  exportAse.href = `../version2/export/ase/${scheme}_${num}.ase`;
+  exportAse.download = `${scheme}_${num}.ase`;
+  exportGpl.href = `../version2/export/gpl/${scheme}_${num}.gpl`;
+  exportGpl.download = `${scheme}_${num}.gpl`;
+  const lines = colors.map((hx, i) => {
+    const rgb = hx.match(/\w\w/g).map(h => parseInt(h, 16));
+    return `${i + 1} ${rgb[0]} ${rgb[1]} ${rgb[2]}`;
+  }).join('\n');
+  const blob = new Blob([lines], { type: 'text/plain' });
+  if (exportClr.href && exportClr.href.startsWith('blob:')) {
+    URL.revokeObjectURL(exportClr.href);
+  }
+  exportClr.href = URL.createObjectURL(blob);
+  exportClr.download = `${scheme}_${num}.clr`;
+}
+
+copyJsBtn.addEventListener('click', () => {
+  const text = JSON.stringify(colors);
+  exportText.value = text;
+  navigator.clipboard.writeText(text);
+});
+
+copyCssBtn.addEventListener('click', () => {
+  const lines = colors.map((c, i) => `--color-${i + 1}: ${c};`);
+  const text = ':root {\n  ' + lines.join('\n  ') + '\n}';
+  exportText.value = text;
+  navigator.clipboard.writeText(text);
+});
+
 function redraw() {
   computeBreaks();
   updateSchemeInfo();
   if (geo) geo.remove();
   geo = L.geoJson(data, { style: styleFeature, onEachFeature }).addTo(map);
   updateLegend();
+  updateExports();
 }
 
 function loadData() {

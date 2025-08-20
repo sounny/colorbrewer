@@ -18,3 +18,4 @@
 - 2025-07-28 ChatGPT: Default Leaflet view focuses on southeastern US and loads counties layer on startup.
 - 2025-07-29 ChatGPT: Grouped palettes by type with descriptions and range labels to guide scheme selection in Leaflet demo.
 - 2025-08-19 ChatGPT: Legend probe now displays HEX, RGB, and CMYK values for each color.
+- 2025-08-19 ChatGPT: Added export panel to Leaflet demo allowing palette downloads as ASE/GPL/CLR and JS/CSS snippets.
