@@ -21,3 +21,4 @@
 - 2025-08-19 ChatGPT: Added export panel to Leaflet demo allowing palette downloads as ASE/GPL/CLR and JS/CSS snippets.
 - 2025-08-20 ChatGPT: Fixed CLR export to include alpha channel and 0-based indices for better compatibility.
 - 2025-08-21 ChatGPT: Refreshed version2 UI with card-based control panel, modern export panel, and updated styles for clearer hierarchy.
+- 2025-11-20 ChatGPT: Added Leaflet improvement ideas document and linked it from the root README while keeping the existing demo untouched.

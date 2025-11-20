@@ -7,5 +7,8 @@ schemes to a simple map and export the active palette as Adobe Swatch Exchange,
 GIMP palette, Esri colormap, or copyable CSS/JavaScript snippets. The
 `literature/` folder collects reference material used while developing the site.
 
+Ideas for an enhanced Leaflet experience—while keeping the current demo
+unchanged—are documented in `leaflet/IMPROVEMENTS.md`.
+
 Open `index.html` at the project root for background information and links to
 each version.
