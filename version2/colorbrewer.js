@@ -455,17 +455,13 @@ $("#learnmore #close, #mask").click(function(){
 	$("#learnmore, #mask").hide();
 });
 
-var $exportToggle = $("#export-collapse"),
-    $exportContent = $("#selected-data");
-
-if ($exportToggle.length && $exportContent.length) {
-        $exportToggle.on("click", function(){
-                var expanded = $(this).attr("aria-expanded") === "true";
-                $(this).attr("aria-expanded", (!expanded).toString());
-                $(this).text(expanded ? "Show panel" : "Hide panel");
-                $exportContent.stop(true, true).slideToggle(200);
-        });
-}
+$( "#export #tab" ).toggle(
+	function(){
+		$( "#export" ).animate( { "left" : "265px" } );
+	},
+	function(){
+		$( "#export" ).animate( { "left" : "0px" } );
+	})
 
 function rgb2cmyk (r,g,b) {
 	var computedC = 0;
