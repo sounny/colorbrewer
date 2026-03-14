@@ -9,10 +9,13 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 // Controls
 const schemeSelect = document.getElementById('scheme');
 const classesSelect = document.getElementById('classes');
+const modeSelect = document.getElementById('mode');
+const reverseCheck = document.getElementById('reverse');
 const layerSelect = document.getElementById('layer');
 const legend = document.getElementById('legend');
 const probe = document.getElementById('probe');
 const schemeInfo = document.getElementById('scheme-info');
+const recommendation = document.getElementById('recommendation');
 const exportAse = document.getElementById('export-ase');
 const exportGpl = document.getElementById('export-gpl');
 const exportClr = document.getElementById('export-clr');
@@ -21,9 +24,13 @@ const copyJsBtn = document.getElementById('copy-js');
 const copyCssBtn = document.getElementById('copy-css');
 
 // Shared data and style state
-let data, geo;
-let breaks = [], colors = [], ranges = [];
-let minVal = 0, maxVal = 0;
+let data;
+let geo;
+let breaks = [];
+let colors = [];
+let ranges = [];
+let minVal = 0;
+let maxVal = 0;
 
 // Populate color scheme options
 const seq = colorbrewer;
@@ -32,11 +39,12 @@ Object.entries(seq).forEach(([name, val]) => {
   const t = val.properties?.type;
   if (schemesByType[t]) schemesByType[t].push(name);
 });
+
 const typeLabels = { seq: 'Sequential', div: 'Diverging', qual: 'Qualitative' };
-Object.keys(typeLabels).forEach(t => {
+Object.keys(typeLabels).forEach((t) => {
   const group = document.createElement('optgroup');
   group.label = typeLabels[t];
-  schemesByType[t].sort().forEach(name => {
+  schemesByType[t].sort().forEach((name) => {
     const opt = document.createElement('option');
     opt.value = name;
     opt.textContent = name;
@@ -46,14 +54,21 @@ Object.keys(typeLabels).forEach(t => {
 });
 
 const typeDescriptions = {
-  seq: 'Sequential schemes work for ordered data from low to high.',
-  div: 'Diverging schemes emphasize deviation around a midpoint.',
-  qual: 'Qualitative schemes highlight categorical differences.'
+  seq: 'Sequential: ordered low→high values (light to dark).',
+  div: 'Diverging: data around a meaningful middle value.',
+  qual: 'Qualitative: categorical classes with no order.'
+};
+
+const recommendationByType = {
+  seq: 'Tip: use sequential when values have a natural order and no critical midpoint.',
+  div: 'Tip: use diverging when low/high sides must be balanced around a key value.',
+  qual: 'Tip: use qualitative for categories, not magnitude.'
 };
 
 function updateSchemeInfo() {
   const t = seq[schemeSelect.value]?.properties?.type;
   schemeInfo.textContent = t ? typeDescriptions[t] : '';
+  recommendation.textContent = t ? recommendationByType[t] : '';
 }
 
 // Utility helpers
@@ -63,32 +78,52 @@ function rgbArray(str) {
 
 function toHex(str) {
   const [r, g, b] = rgbArray(str);
-  return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+  return `#${[r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('')}`;
 }
 
 function toCmyk(str) {
-  const [r, g, b] = rgbArray(str).map(v => v / 255);
+  const [r, g, b] = rgbArray(str).map((v) => v / 255);
   const k = 1 - Math.max(r, g, b);
   const c = (1 - r - k) / (1 - k) || 0;
   const m = (1 - g - k) / (1 - k) || 0;
   const y = (1 - b - k) / (1 - k) || 0;
-  return [c, m, y, k].map(x => Math.round(x * 100));
+  return [c, m, y, k].map((x) => Math.round(x * 100));
+}
+
+function computeQuantileBreaks(values, num) {
+  const sorted = values.slice().sort((a, b) => a - b);
+  const quantileBreaks = [];
+  for (let i = 1; i < num; i += 1) {
+    quantileBreaks.push(sorted[Math.floor((i * sorted.length) / num)]);
+  }
+  return quantileBreaks;
+}
+
+function computeEqualBreaks(num) {
+  const step = (maxVal - minVal) / num;
+  const equalBreaks = [];
+  for (let i = 1; i < num; i += 1) {
+    equalBreaks.push(minVal + i * step);
+  }
+  return equalBreaks;
 }
 
 function computeBreaks() {
   const scheme = schemeSelect.value || 'YlGn';
   const num = parseInt(classesSelect.value, 10) || 3;
-  colors = seq[scheme][num];
-  const values = data.features.map(f => f.properties.density);
+  const schemeColors = seq[scheme][num];
+  colors = reverseCheck.checked ? schemeColors.slice().reverse() : schemeColors.slice();
+
+  const values = data.features.map((f) => f.properties.density);
   minVal = Math.min(...values);
   maxVal = Math.max(...values);
-  const sorted = values.slice().sort((a, b) => a - b);
-  breaks = [];
-  for (let i = 1; i < num; i++) {
-    breaks.push(sorted[Math.floor(i * values.length / num)]);
-  }
+
+  breaks = modeSelect.value === 'equal'
+    ? computeEqualBreaks(num)
+    : computeQuantileBreaks(values, num);
+
   ranges = [];
-  for (let i = 0; i < num; i++) {
+  for (let i = 0; i < num; i += 1) {
     const from = i === 0 ? minVal : breaks[i - 1];
     const to = i === num - 1 ? maxVal : breaks[i];
     ranges.push([from, to]);
@@ -97,7 +132,7 @@ function computeBreaks() {
 
 function getClassIndex(d) {
   const num = parseInt(classesSelect.value, 10) || 3;
-  for (let i = num - 1; i > 0; i--) {
+  for (let i = num - 1; i > 0; i -= 1) {
     if (d >= breaks[i - 1]) return i;
   }
   return 0;
@@ -105,41 +140,59 @@ function getClassIndex(d) {
 
 function styleFeature(feature) {
   const idx = getClassIndex(feature.properties.density);
-  return { weight: 1, color: 'white', fillColor: colors[idx], fillOpacity: 0.7 };
+  return {
+    weight: 0.8,
+    color: '#fff',
+    fillColor: colors[idx],
+    fillOpacity: 0.78
+  };
 }
 
-function showProbeFromEvent(e, idx) {
+function showProbeFromEvent(e, idx, labelPrefix = '') {
   const col = colors[idx];
   const [r, g, b] = rgbArray(col);
   const [c, m, y, k] = toCmyk(col);
-  probe.innerHTML = `<p>${schemeSelect.value} class ${idx + 1}<br/>HEX: ${toHex(col)}<br/>RGB: ${r}, ${g}, ${b}<br/>CMYK: ${c}, ${m}, ${y}, ${k}</p>`;
-  probe.style.left = (e.clientX + 10) + 'px';
-  probe.style.top = (e.clientY + 10) + 'px';
+  const title = labelPrefix || `${schemeSelect.value} class ${idx + 1}`;
+  probe.innerHTML = `<p>${title}<br>HEX: ${toHex(col)}<br>RGB: ${r}, ${g}, ${b}<br>CMYK: ${c}, ${m}, ${y}, ${k}</p>`;
+  probe.style.left = `${e.clientX + 10}px`;
+  probe.style.top = `${e.clientY + 10}px`;
   probe.style.display = 'block';
 }
 
 function onEachFeature(feature, layer) {
-  const idx = getClassIndex(feature.properties.density);
   layer.on({
     mouseover(e) {
-      layer.setStyle({ weight: 2 });
-      showProbeFromEvent(e.originalEvent, idx);
+      const idx = getClassIndex(feature.properties.density);
+      layer.setStyle({ weight: 1.5, color: '#333' });
+      showProbeFromEvent(e.originalEvent, idx, `${feature.properties.name || 'Area'}: ${feature.properties.density.toFixed(1)}`);
     },
     mousemove(e) {
-      showProbeFromEvent(e.originalEvent, idx);
+      const idx = getClassIndex(feature.properties.density);
+      showProbeFromEvent(e.originalEvent, idx, `${feature.properties.name || 'Area'}: ${feature.properties.density.toFixed(1)}`);
     },
     mouseout() {
-      layer.setStyle({ weight: 1 });
+      geo.resetStyle(layer);
       probe.style.display = 'none';
     }
   });
 }
 
+function formatRangeLabel(range) {
+  return `${range[0].toFixed(1)} – ${range[1].toFixed(1)}`;
+}
+
 function updateLegend() {
   legend.innerHTML = '';
+
+  const title = document.createElement('div');
+  title.className = 'legend-title';
+  title.textContent = `Legend (${modeSelect.value === 'equal' ? 'Equal interval' : 'Quantile'})`;
+  legend.appendChild(title);
+
   ranges.forEach((range, idx) => {
     const item = document.createElement('div');
     item.className = 'legend-item';
+
     const chip = document.createElement('span');
     const col = colors[idx];
     const [r, g, b] = rgbArray(col);
@@ -147,21 +200,23 @@ function updateLegend() {
     chip.className = 'legend-chip';
     chip.style.backgroundColor = col;
     chip.title = `HEX: ${toHex(col)} RGB: ${r}, ${g}, ${b} CMYK: ${c}, ${m}, ${y}, ${k}`;
-    chip.addEventListener('mouseenter', e => {
-      probe.innerHTML = `<p>HEX: ${toHex(col)}<br/>RGB: ${r}, ${g}, ${b}<br/>CMYK: ${c}, ${m}, ${y}, ${k}</p>`;
-      probe.style.left = (e.clientX + 10) + 'px';
-      probe.style.top = (e.clientY + 10) + 'px';
-      probe.style.display = 'block';
+    chip.addEventListener('mouseenter', (e) => {
+      showProbeFromEvent(e, idx, `${schemeSelect.value} class ${idx + 1}`);
     });
-    chip.addEventListener('mousemove', e => {
-      probe.style.left = (e.clientX + 10) + 'px';
-      probe.style.top = (e.clientY + 10) + 'px';
+    chip.addEventListener('mousemove', (e) => {
+      probe.style.left = `${e.clientX + 10}px`;
+      probe.style.top = `${e.clientY + 10}px`;
     });
-    chip.addEventListener('mouseleave', () => { probe.style.display = 'none'; });
+    chip.addEventListener('mouseleave', () => {
+      probe.style.display = 'none';
+    });
+
     item.appendChild(chip);
+
     const label = document.createElement('span');
-    label.textContent = `${range[0].toFixed(1)} – ${range[1].toFixed(1)}`;
+    label.textContent = formatRangeLabel(range);
     item.appendChild(label);
+
     legend.appendChild(item);
   });
 }
@@ -173,12 +228,14 @@ function updateExports() {
   exportAse.download = `${scheme}_${num}.ase`;
   exportGpl.href = `../version2/export/gpl/${scheme}_${num}.gpl`;
   exportGpl.download = `${scheme}_${num}.gpl`;
+
   const lines = colors
-    .map((hx, i) => {
-      const rgb = hx.match(/\w\w/g).map(h => parseInt(h, 16));
+    .map((rgbString, i) => {
+      const rgb = rgbArray(rgbString);
       return `${i} ${rgb[0]} ${rgb[1]} ${rgb[2]} 255`;
     })
     .join('\n') + '\n';
+
   const blob = new Blob([lines], { type: 'text/plain' });
   if (exportClr.href && exportClr.href.startsWith('blob:')) {
     URL.revokeObjectURL(exportClr.href);
@@ -188,23 +245,26 @@ function updateExports() {
 }
 
 copyJsBtn.addEventListener('click', () => {
-  const text = JSON.stringify(colors);
+  const text = JSON.stringify(colors.map(toHex));
   exportText.value = text;
   navigator.clipboard.writeText(text);
 });
 
 copyCssBtn.addEventListener('click', () => {
-  const lines = colors.map((c, i) => `--color-${i + 1}: ${c};`);
-  const text = ':root {\n  ' + lines.join('\n  ') + '\n}';
+  const lines = colors.map((c, i) => `--color-${i + 1}: ${toHex(c)};`);
+  const text = `:root {\n  ${lines.join('\n  ')}\n}`;
   exportText.value = text;
   navigator.clipboard.writeText(text);
 });
 
 function redraw() {
+  if (!data) return;
   computeBreaks();
   updateSchemeInfo();
+
   if (geo) geo.remove();
   geo = L.geoJson(data, { style: styleFeature, onEachFeature }).addTo(map);
+
   updateLegend();
   updateExports();
 }
@@ -212,19 +272,24 @@ function redraw() {
 function loadData() {
   const url = layerSelect.value === 'counties' ? 'data/us-counties.json' : 'data/us-states.json';
   fetch(url)
-    .then(resp => {
-      if (!resp.ok) throw new Error('GeoJSON not found: ' + url);
+    .then((resp) => {
+      if (!resp.ok) throw new Error(`GeoJSON not found: ${url}`);
       return resp.json();
     })
-    .then(json => { data = json; redraw(); })
-    .catch(err => {
+    .then((json) => {
+      data = json;
+      redraw();
+    })
+    .catch((err) => {
       console.error(err);
-      alert('Could not load ' + url + '. Please add the file to the data folder.');
+      alert(`Could not load ${url}. Please add the file to the data folder.`);
     });
 }
 
 schemeSelect.addEventListener('change', redraw);
 classesSelect.addEventListener('change', redraw);
+modeSelect.addEventListener('change', redraw);
+reverseCheck.addEventListener('change', redraw);
 layerSelect.addEventListener('change', loadData);
 
 // Initial load

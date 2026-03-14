@@ -1,12 +1,155 @@
-html, body { margin: 0; padding: 0; height: 100%; }
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
 #map { width: 100%; height: 100%; }
-.controls { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.8); padding: 10px; z-index: 1000; font-family: sans-serif; }
-#scheme-info { margin-top: 5px; font-size: 12px; max-width: 150px; }
-#legend { position: absolute; bottom: 10px; left: 10px; background: rgba(255,255,255,0.8); padding: 5px; z-index: 1000; display: flex; flex-direction: column; gap: 4px; font-family: sans-serif; }
-.legend-item { display: flex; align-items: center; gap: 4px; }
-.legend-chip { width: 20px; height: 20px; border: 1px solid #ccc; cursor: pointer; flex: none; }
-#probe { position: absolute; display: none; background: rgba(50,50,50,.85); color: #fff; font-size: 11px; font-weight: bold; line-height: 14px; padding: 4px; pointer-events: none; z-index: 1001; }
-#export { position: absolute; bottom: 10px; right: 10px; background: rgba(255,255,255,0.8); padding: 5px; z-index: 1000; font-family: sans-serif; width: 180px; }
-#export .export-links { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-#export a, #export button { background: #eee; border: 1px solid #ccc; padding: 2px 4px; font-size: 12px; text-decoration: none; cursor: pointer; }
-#export textarea { width: 100%; height: 60px; margin-top: 4px; font-size: 11px; }
+
+.controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 280px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #7f7f7f;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  z-index: 1000;
+}
+
+.controls h1 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.tagline {
+  margin: 4px 0 10px;
+  font-size: 12px;
+  color: #4b4b4b;
+}
+
+.controls label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.controls select {
+  display: block;
+  width: 100%;
+  margin-top: 3px;
+  border: 1px solid #888;
+  padding: 2px;
+  font-size: 12px;
+  background: #fff;
+}
+
+.inline-toggle {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+  font-weight: normal !important;
+}
+
+#scheme-info,
+#recommendation {
+  font-size: 12px;
+  padding: 6px;
+  border: 1px solid #d9d9d9;
+  background: #f6f6f6;
+}
+
+#scheme-info { margin-top: 6px; }
+#recommendation { margin-top: 6px; }
+
+#legend {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  min-width: 190px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #7f7f7f;
+  padding: 8px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.legend-title {
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 3px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.legend-chip {
+  width: 22px;
+  height: 16px;
+  border: 1px solid #b9b9b9;
+  cursor: pointer;
+  flex: none;
+}
+
+#probe {
+  position: absolute;
+  display: none;
+  background: rgba(35, 35, 35, 0.92);
+  color: #fff;
+  font-size: 11px;
+  line-height: 14px;
+  padding: 5px 6px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 1001;
+}
+
+#probe p { margin: 0; }
+
+#export {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 230px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #7f7f7f;
+  padding: 8px;
+  z-index: 1000;
+  font-size: 12px;
+}
+
+#export .export-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+#export a,
+#export button {
+  background: #efefef;
+  border: 1px solid #9d9d9d;
+  padding: 2px 6px;
+  font-size: 12px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+#export textarea {
+  width: 100%;
+  height: 64px;
+  margin-top: 6px;
+  border: 1px solid #bbb;
+  font-size: 11px;
+  resize: vertical;
+}

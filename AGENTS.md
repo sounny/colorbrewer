@@ -23,3 +23,5 @@
 - 2025-08-21 ChatGPT: Refreshed version2 UI with card-based control panel, modern export panel, and updated styles for clearer hierarchy.
 - 2025-11-20 ChatGPT: Added Leaflet improvement ideas document and linked it from the root README while keeping the existing demo untouched.
 - 2025-11-21 ChatGPT: Reverted version2 interface to the original Cynthia Brewer Version 2 look; keep future changes true to that design.
+
+- 2026-03-14 GPT-5.2-Codex: Enhanced Leaflet demo to better reflect ColorBrewer spirit with guidance-first control panel, quantile/equal interval classification toggle, palette reversal, clearer legend, and richer map hover context.
